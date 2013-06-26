@@ -5,6 +5,7 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+	"bufio"
 )
 
 //IndexFileParse will read a file which contains one line with integer numbers separated by spaces. It returns those numbers
@@ -33,7 +34,7 @@ func IndexFileParse(filename string) ([]int, error) {
 
 //returns true if test is in container, false otherwise.
 
-func IsInInt(container []int, test int) bool {
+func IsInInt(test int, container []int) bool {
 	if container == nil {
 		return false
 	}
@@ -46,7 +47,7 @@ func IsInInt(container []int, test int) bool {
 }
 
 //Same as the previous, but with strings.
-func IsInString(container []string, test string) bool {
+func IsInString(test string, container []string) bool {
 	if container == nil {
 		return false
 	}
