@@ -1,4 +1,4 @@
-package chemu
+package scu
 
 import (
 	"os"
