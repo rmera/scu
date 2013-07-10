@@ -1,2 +1,2 @@
-Chemutils is a bunch of small utilities that used to belong to gochem, but that got their own package 
-because they don't quite fit the rest of the library. It contains assistance functions for common tasks.
+SCU (Silly Chemistry Utillities) is a bunch of small utilities that used to belong to gochem, but that got their own package 
+because they don't quite fit the rest of the library. It contains assistance functions for small, common tasks.
