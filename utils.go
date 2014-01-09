@@ -21,7 +21,14 @@ func IndexFileParse(filename string) ([]int, error) {
 	if err != nil {
 		return nil, err
 	}
-	fields := strings.Fields(line)
+	ret,err := IndexStringParse(line)
+	return ret, err
+}
+
+
+func IndexStringParse(str string) ([]int, error){
+	var err error
+	fields := strings.Fields(str)
 	ret := make([]int, len(fields))
 	for key, val := range fields {
 		ret[key], err = strconv.Atoi(val)
@@ -31,6 +38,7 @@ func IndexFileParse(filename string) ([]int, error) {
 	}
 	return ret, nil
 }
+
 
 //returns true if test is in container, false otherwise.
 
