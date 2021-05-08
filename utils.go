@@ -2,11 +2,11 @@ package scu
 
 import (
 	"bufio"
+	"fmt"
 	"os"
 	"reflect"
 	"strconv"
 	"strings"
-	"fmt"
 )
 
 type MolAtom struct {
@@ -52,7 +52,6 @@ func IndexStringParse(str string) ([]int, error) {
 	return ret, nil
 }
 
-
 func MolAtomFileParse(filename string) ([]*MolAtom, error) {
 	parfile, err := os.Open(filename)
 	if err != nil {
@@ -68,32 +67,29 @@ func MolAtomFileParse(filename string) ([]*MolAtom, error) {
 	return ret, err
 }
 
-
 func MolAtomStringParse(str string) ([]*MolAtom, error) {
 	var err error
 	fields := strings.Fields(str)
-	l:=len(fields)
-	if l%2!=0{
-		return nil, fmt.Errorf("The string to process must have an even number of fields but it has: %d",l)
+	l := len(fields)
+	if l%2 != 0 {
+		return nil, fmt.Errorf("The string to process must have an even number of fields but it has: %d", l)
 	}
-	ret := make([]*MolAtom,0, len(fields)/2)
+	ret := make([]*MolAtom, 0, len(fields)/2)
 	var m *MolAtom
 	for key, val := range fields {
-		if (key+2)%2==0{
-			m=new(MolAtom)
+		if (key+2)%2 == 0 {
+			m = new(MolAtom)
 			m.molid, err = strconv.Atoi(val)
 			if err != nil {
 				return nil, err
 			}
-		}else{
+		} else {
 			m.atname = val
-			ret=append(ret,m)
+			ret = append(ret, m)
 		}
 	}
 	return ret, nil
 }
-
-
 
 //returns true if test is in container, false otherwise.
 
@@ -142,4 +138,45 @@ func IsIn(test interface{}, set interface{}) int {
 		}
 	}
 	return -1
+}
+
+//search a file backwards, i.e., starting from the end, for a string. Returns the line that contains the string, or an empty string
+func BackwardsSearch(filename, str string) string {
+	var ini int64 = 0
+	var end int64 = 0
+	var first bool
+	first = true
+	buf := make([]byte, 1)
+	f, err := os.Open(filename)
+	if err != nil {
+		return ""
+	}
+	defer f.Close()
+	var i int64 = 1
+	for ; ; i++ {
+		if _, err := f.Seek(-1*i, 2); err != nil {
+			return ""
+		}
+		if _, err := f.Read(buf); err != nil {
+			return ""
+		}
+		if buf[0] == byte('\n') && first == false {
+			first = true
+		} else if buf[0] == byte('\n') && end == 0 {
+			end = i
+		} else if buf[0] == byte('\n') && ini == 0 {
+			i--
+			ini = i
+			f.Seek(-1*(ini), 2)
+			bufF := make([]byte, ini-end)
+			f.Read(bufF)
+			if strings.Contains(string(bufF), str) {
+				return string(bufF)
+			}
+			//	first=false
+			end = 0
+			ini = 0
+		}
+
+	}
 }
