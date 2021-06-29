@@ -141,6 +141,8 @@ func IsIn(test interface{}, set interface{}) int {
 }
 
 //search a file backwards, i.e., starting from the end, for a string. Returns the line that contains the string, or an empty string
+//This will fail if the seeked line is the first one. Instead of fixing it, I wrote a more general way of reading a file backwards
+//the BWFile structure and it's methods. Use that instead of this.
 func BackwardsSearch(filename, str string) string {
 	var ini int64 = 0
 	var end int64 = 0
@@ -179,4 +181,166 @@ func BackwardsSearch(filename, str string) string {
 		}
 
 	}
+}
+
+//BWFile is a structure for
+//reading a file line by line, but starting from
+//the file's end and backwards towards its
+//begining.
+type BWFile struct {
+	fname    string
+	f        *os.File
+	readable bool
+	EOF      bool
+	i        int64
+}
+
+//Creates a BWFile structure from the name of a file, returns a pointer
+//to it and an error.
+func NewBWFile(fname string) (*BWFile, error) {
+	var err error
+	r := new(BWFile)
+	r.f, err = os.Open(fname)
+	if err != nil {
+		return nil, err
+	}
+	r.readable = true
+	r.i = 1
+	r.fname = fname
+	return r, err
+
+}
+
+//Closes the file.
+//when you finished reading it
+func (B *BWFile) Close() {
+	B.f.Close()
+	B.readable = false
+	B.EOF = false
+}
+
+//Reads the previous line of the file. Returns the read string and an error
+//An attempt to read a line after the first one has ben read will return
+//an EOF error and close the file. Further attempts, as any attempt to
+//read an unopened file will return a "not readable" error.
+func (B *BWFile) PrevLine() (string, error) {
+	if B.EOF {
+		B.Close()
+		B.EOF = false
+		return "", fmt.Errorf("EOF")
+	}
+	if !B.readable {
+		return "", fmt.Errorf("scu/BWFile: %s is not readable", B.fname)
+	}
+	var ini int64 = 0
+	var end int64 = 0
+	buf := make([]byte, 1)
+	var last bool
+
+	for ; ; B.i++ {
+		//	if last {
+		///		return "", fmt.Errorf("EOF")
+		//	}
+		if _, err := B.f.Seek(-1*B.i, 2); err != nil {
+			if !strings.Contains(err.Error(), "invalid argument") {
+				return "", err
+			}
+			last = true
+			B.i--
+			B.f.Seek(-1*B.i, 2)
+			B.i++
+
+		}
+		if _, err := B.f.Read(buf); err != nil {
+			B.Close()
+			return "", err
+		}
+		if last {
+			buf[0] = byte('\n')
+		}
+		if buf[0] == byte('\n') && end == 0 {
+			end = B.i
+		} else if buf[0] == byte('\n') && ini == 0 {
+			B.i--
+			ini = B.i
+			B.f.Seek(-1*(ini), 2)
+			bufF := make([]byte, ini-end)
+			B.f.Read(bufF)
+			B.i++
+			if last {
+				B.EOF = true
+			}
+			return string(bufF), nil
+		}
+
+	}
+
+}
+
+//MustReadFile is a structure to
+//somewhat simplify reading text from a file
+//Including the option for reading line by line with
+//panics on failure, instead of error
+type MustReadFile struct {
+	fname    string
+	f        *os.File
+	buf      *bufio.Reader
+	readable bool
+}
+
+func NewMustReadFile(name string) (*MustReadFile, error) {
+	var err error
+	r := new(MustReadFile)
+	r.f, err = os.Open(name)
+	if err != nil {
+		return nil, err
+	}
+	r.buf = bufio.NewReader(r.f)
+	r.readable = true
+	return r, err
+
+}
+
+//ErrNext does the same as just reading the file with
+//as a bufio.Reader, except that in case of EOF it marks
+//the file as unreadable
+func (F *MustReadFile) ErrNext() (string, error) {
+	line, err := F.buf.ReadString('\n')
+	if err != nil && err.Error() == "EOF" {
+		F.readable = false
+	}
+	return line, err
+}
+
+//reads the next line of a file and returns it. Panics on error, except
+//EOF, in which case, it returns the string "EOF". If a further read is
+//attempted after an EOF, Next will panic.
+func (F *MustReadFile) Next() string {
+	if !F.readable {
+		panic(fmt.Sprintf("MustReadFile: %s not readable", F.fname))
+	}
+	line, err := F.buf.ReadString('\n')
+	if err != nil {
+		if err.Error() == "EOF" {
+			F.readable = false
+			return err.Error()
+		} else {
+			panic(err.Error())
+		}
+	}
+	return line
+}
+
+//Closes the file.
+//when you finished reading it
+func (F *MustReadFile) Close() {
+	F.f.Close()
+	F.readable = false
+}
+
+//Opens a the file 'name' to append. Creates a new file if
+//it doesn't exist
+func OpenToAppend(name string) (*os.File, error) {
+	return os.OpenFile(name,
+		os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 }
