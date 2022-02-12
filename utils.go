@@ -227,7 +227,7 @@ func (B *BWFile) PrevLine() (string, error) {
 	if B.EOF {
 		B.Close()
 		B.EOF = false
-		return "", fmt.Errorf("EOF")
+		return "EOF", fmt.Errorf("EOF")
 	}
 	if !B.readable {
 		return "", fmt.Errorf("scu/BWFile: %s is not readable", B.fname)
@@ -343,4 +343,32 @@ func (F *MustReadFile) Close() {
 func OpenToAppend(name string) (*os.File, error) {
 	return os.OpenFile(name,
 		os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+}
+
+//Parses the int present in the string number, after removing
+//leading and trailing spaces (as defined by Unicode, so \n and \t get removed also.
+//Panics if it can't parse the float.
+func MustAtoi(number string) int {
+	num, err := strconv.Atoi(strings.TrimSpace(number))
+	if err != nil {
+		panic(err.Error())
+	}
+	return num
+
+}
+
+//Parses the float present in the string number, after removing
+//leading and trailing spaces (as defined by Unicode, so \n and \t get removed also.
+//Panics if it can't parse the float.
+func MustParseFloat(number string, size ...int) float64 {
+	s := 64
+	if len(size) < 0 && size[0] == 32 {
+		s = size[0]
+	}
+	num, err := strconv.ParseFloat(strings.TrimSpace(number), s)
+	if err != nil {
+		panic(err.Error())
+	}
+	return num
+
 }
