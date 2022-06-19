@@ -372,3 +372,13 @@ func MustParseFloat(number string, size ...int) float64 {
 	return num
 
 }
+
+//QErr takes an error and panics unless the error is nil.
+//It is a silly little function to quickly deal with errors
+//in small, throw-away programs, not to be used on longer
+//programs that are meant to be mantained.
+func QErr(err error) {
+	if err != nil {
+		panic(err.Error())
+	}
+}
