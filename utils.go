@@ -91,6 +91,24 @@ func MolAtomStringParse(str string) ([]*MolAtom, error) {
 	return ret, nil
 }
 
+//these things will go away when generics reach the standard library.
+
+//appends test to containter only if it's not already present
+func AppendNRString(test string, container []string) []string {
+	if !IsInString(test, container) {
+		return append(container, test)
+	}
+	return container
+}
+
+//appends test to containter only if it's not already present
+func AppendNRInt(test int, container []int) []int {
+	if !IsInInt(test, container) {
+		return append(container, test)
+	}
+	return container
+}
+
 //returns true if test is in container, false otherwise.
 
 func IsInInt(test int, container []int) bool {
