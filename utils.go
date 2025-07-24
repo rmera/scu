@@ -11,6 +11,26 @@ import (
 	"strings"
 )
 
+// A not efficient function to delete from v all elements with indexes in todel
+// The slice todel is altered (sorted in descending order)
+func Delete[S ~[]E, E any](v S, todel []int) S {
+	slices.Sort(todel)
+	slices.Reverse(todel)
+	for _, w := range todel {
+		v = slices.Delete(v, w, w+1)
+	}
+	return v
+}
+
+func IsContiguous(s []int) bool {
+	for i, v := range s[1:] {
+		if v != s[i-1] {
+			return false
+		}
+	}
+	return true
+}
+
 func Intersection[S ~[]E, E comparable](v1 S, v2 S) S {
 	ret := make([]E, 0, 1)
 	for _, v := range v1 {
