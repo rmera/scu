@@ -6,9 +6,34 @@ import (
 	"os"
 	"reflect"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 )
+
+func Intersection[S ~[]E, E comparable](v1 S, v2 S) S {
+	ret := make([]E, 0, 1)
+	for _, v := range v1 {
+		if slices.Contains(v2, v) {
+			ret = append(ret, v)
+		}
+	}
+	return ret
+}
+
+// Is subset a subset of set?
+// 2 identical sets are subsets of each other.
+func IsSubset[S ~[]E, E comparable](subset S, set S) bool {
+	if len(subset) > len(set) {
+		return false //saves some time
+	}
+	for _, v := range subset {
+		if !slices.Contains(set, v) {
+			return false
+		}
+	}
+	return true
+}
 
 // MolAtom is a simple structure to keep track of goChem atoms, keeping only the molID and atname
 type MolAtom struct {

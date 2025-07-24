@@ -1,3 +1,3 @@
 module github.com/rmera/scu
 
-go 1.14
+go 1.22
