@@ -10,25 +10,25 @@ import (
 	"strings"
 )
 
-//MolAtom is a simple structure to keep track of goChem atoms, keeping only the molID and atname
+// MolAtom is a simple structure to keep track of goChem atoms, keeping only the molID and atname
 type MolAtom struct {
 	molid  int
 	atname string
 }
 
-//Molid returns the molid of the atom
+// Molid returns the molid of the atom
 func (M *MolAtom) Molid() int {
 	return M.molid
 }
 
-//AtName returns the name of the atom
+// AtName returns the name of the atom
 func (M *MolAtom) AtName() string {
 	return M.atname
 }
 
-//ReplaceInFile replaces the occurences of regex in the file inpfile, into a new file
-//outfile. If inpfile and outfile are the same, it creates a temporal file with the
-//replacement, which then replaces inpfile by renaming.
+// ReplaceInFile replaces the occurences of regex in the file inpfile, into a new file
+// outfile. If inpfile and outfile are the same, it creates a temporal file with the
+// replacement, which then replaces inpfile by renaming.
 func ReplaceInFile(inpfile, outfile, regex, replacement string) error {
 	out := outfile
 	if outfile == inpfile {
@@ -95,7 +95,7 @@ func IndexFileParse(filename string) ([]int, error) {
 	return ret, err
 }
 
-//IndexesFileParse will read a file which contains several lines with integer numbers separated by spaces. It returns those numbers
+// IndexesFileParse will read a file which contains several lines with integer numbers separated by spaces. It returns those numbers
 // as a slice of slices of ints, and an error or nil.
 func IndexesFileParse(fname string) ([][]int, error) {
 	ret := make([][]int, 0, 3)
@@ -129,8 +129,8 @@ func IndexStringParse(str string) ([]int, error) {
 	return ret, nil
 }
 
-//MolAtomFileParse parses a file with a line that contains one or more "atom" info (pairs of molid, atomname)
-//only the first line of the file is read. A slice of *MolAtom is returned
+// MolAtomFileParse parses a file with a line that contains one or more "atom" info (pairs of molid, atomname)
+// only the first line of the file is read. A slice of *MolAtom is returned
 func MolAtomFileParse(filename string) ([]*MolAtom, error) {
 	parfile, err := os.Open(filename)
 	if err != nil {
@@ -146,8 +146,8 @@ func MolAtomFileParse(filename string) ([]*MolAtom, error) {
 	return ret, err
 }
 
-//MolAtomStringParse Parses a string that contains one or more "atom" info (pairs of molid, atomname)
-//only the first line of the file is read. A slice of *MolAtom is returned
+// MolAtomStringParse Parses a string that contains one or more "atom" info (pairs of molid, atomname)
+// only the first line of the file is read. A slice of *MolAtom is returned
 func MolAtomStringParse(str string) ([]*MolAtom, error) {
 	var err error
 	fields := strings.Fields(str)
@@ -172,10 +172,10 @@ func MolAtomStringParse(str string) ([]*MolAtom, error) {
 	return ret, nil
 }
 
-//BackwardSearch (DEPRECATED) search a file backwards, i.e., starting from the end,
-//for a string. Returns the line that contains the string, or an empty
-//string. This will fail if the seeked line is the first one. Instead
-//of fixing it, I wrote a more general way of reading a file backwards
+// BackwardSearch (DEPRECATED) search a file backwards, i.e., starting from the end,
+// for a string. Returns the line that contains the string, or an empty
+// string. This will fail if the seeked line is the first one. Instead
+// of fixing it, I wrote a more general way of reading a file backwards
 // the BWFile structure and it's methods. Use that instead of this.
 func BackwardsSearch(filename, str string) string {
 	var ini int64 = 0
@@ -411,9 +411,13 @@ func MustParseFloat(number string, size ...int) float64 {
 // It is a silly little function to quickly deal with errors
 // in small, throw-away programs, not to be used on longer
 // programs that are meant to be mantained.
-func QErr(err error) {
+func QErr(err error, additionalmsg ...string) {
 	if err != nil {
-		panic(err.Error())
+		str := ""
+		if len(additionalmsg) > 0 {
+			str = strings.Join(additionalmsg, " - ")
+		}
+		panic(str + " " + err.Error())
 	}
 }
 
