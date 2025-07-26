@@ -11,8 +11,35 @@ import (
 	"strings"
 )
 
+// Prints the d arguments to stderr
+// Meant to be a debugging function that's easy to find and delete
+// from programs.
+func DB(d ...interface{}) {
+	fmt.Fprintln(os.Stderr, d...)
+}
+
+// If cutoff  is greater or equal to verb, prints the d arguments to stderr
+// In either case, returns the argument as a string.
+func LogV(cutoff, verb int, d ...interface{}) string {
+	if cutoff <= verb {
+		fmt.Fprintln(os.Stderr, d...)
+	}
+	return fmt.Sprintln(d...)
+
+}
+
+// If cutoff  is greater or equal to verb, prints the d arguments to stdout
+// Otherwise, does nothing.
+func PrintV(cutoff, verb int, d ...interface{}) {
+	if cutoff <= verb {
+		fmt.Println(d...)
+	}
+
+}
+
 // A not efficient function to delete from v all elements with indexes in todel
-// The slice todel is altered (sorted in descending order)
+// The slice todel (i.e. NOT the slice from which elements are being deleted,
+// but the one containing the indexes) is altered (sorted in descending order)
 func Delete[S ~[]E, E any](v S, todel []int) S {
 	slices.Sort(todel)
 	slices.Reverse(todel)
@@ -22,6 +49,7 @@ func Delete[S ~[]E, E any](v S, todel []int) S {
 	return v
 }
 
+// if each element of the slice (except for the first) is 1+the previous element, the slice is contiguous
 func IsContiguous(s []int) bool {
 	for i, v := range s[1:] {
 		if v != s[i-1] {
@@ -31,6 +59,7 @@ func IsContiguous(s []int) bool {
 	return true
 }
 
+// Returns a slice witht the elements v1 and v2 have in common.
 func Intersection[S ~[]E, E comparable](v1 S, v2 S) S {
 	ret := make([]E, 0, 1)
 	for _, v := range v1 {
