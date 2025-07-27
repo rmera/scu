@@ -11,9 +11,16 @@ import (
 	"strings"
 )
 
+// format-panic. Panics with the given format string and its variables.
+// Just because you are panicking doesn't mean you can't be methodical.
+func Fpanic(s string, a ...any) {
+	panic(fmt.Sprintf(s, a...))
+
+}
+
 // Prints the d arguments to stderr
 // Meant to be a debugging function that's easy to find and delete
-// from programs.
+// from programs. Yeah, I use print statements.
 func DB(d ...interface{}) {
 	fmt.Fprintln(os.Stderr, d...)
 }
